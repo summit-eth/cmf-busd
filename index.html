@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en-us">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<link rel="icon" href="favicon.ico">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+<link rel="manifest" href="site.webmanifest">
+<title>CryptoMoonFarm - Start and earn with your BUSD Farm now!</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Exo+2:wght@200;400;700;900&display=swap">
+<link rel="stylesheet" href="css/reset.css">
+<link rel="stylesheet" href="css/design.css?v=1">
+</head>
+<body>
+
+    <div id="cmf">
+    
+        <div id="nav">
+            <div class="wrapper">
+                <img src="img/logo@2x.png">
+                <button @click="connectWallet()" v-if="user.address==''">connect wallet</button>
+            </div>
+            <div class="wrapper">
+                <a href="#">Verified Contract</a><br>
+                <a href="#">Telegram</a>
+            </div>
+        </div>
+        
+        <div id="main">
+            <div class="wrapper">
+            
+                <div>
+                    <h1>1. Approve BUSD</h1>
+                    <p>Your Wallet:</p>
+                    <p>{{format(user.balance,2,1)}} BUSD</p>
+                    <input type="number" placeholder="100 BUSD" v-model="val.approve">
+                    <button @click="approve">approve</button>
+                    <p>Approved: {{format(user.allowance,2)}} BUSD</p>
+                </div>
+                
+                <div>
+                    <h1>2. Hire Farmers</h1>
+                    <p>Max Allowed:</p>
+                    <p>{{(user.allowance>chain.balance/max_divisor)?(chain.balance/max_divisor>5e4?5e4:format(chain.balance/max_divisor,2)):(user.allowance>5e4?5e4:format(user.allowance,2))}} BUSD</p>
+                    <input type="number" placeholder="100 BUSD" v-model="val.spend">
+                    <button @click="buy">hire {{format(val.spend/chain.price,2)}} farmers</button>
+                    <p>Price per Farmer: {{chain.price}} BUSD</p>
+                </div>
+                
+                <div>
+                    <h1>3. Collect</h1>
+                    <p>Your Have: {{format(user.workers,2)}} Farmers</p>
+                    <p>Harvest Rate: {{format(user.workers*0.1,2)}} BUSD/day</p>
+                    <p>Available: {{format(user.claimable,8)}} BUSD</p>
+                    <button @click="compound">hire {{Math.floor(user.claimable*100/chain.price)/100}} farmers</button>
+                    <button @click="collect">collect busd</button>
+                </div>
+                
+            </div>
+            
+            <div class="wrapper">
+                
+                <div>
+            
+                    <h2>Referrals</h2>
+                    <p>Refer users and earn 10%!</p>
+                    <p>https://busd.cryptomoon.farm?ref={{user.address}}</p>
+                    <button @click="copyRef">copy link</button>
+                    
+                </div>
+                
+                <div>
+                    <h6>Contract Balance</h6>
+                    <h2>{{format(chain.balance,2,1)}} BUSD</h2>
+                </div>
+                
+            </div>
+            
+            <div class="wrapper">
+            
+                <h2>Farming Instructions</h2>
+                <p>Approve BUSD Spend > Hire Farmers > Farmers Mint BUSD > Compound Daily > Withdraw > Profit!</p>
+                <ul>
+                    <li>Choose how much BUSD you want to spend and click "Approve".</li>
+                    <li>"Hire Farmers" using approved BUSD.</li>
+                    <li>Your Farmers will start farming, placing the BUSD they harvest into your account.</li>
+                    <li>You can compound your earnings using the "Hire More Farmers" button. This uses the BUSD in your account to increase your BUSD farming rate.</li>
+                    <li>Alternatively, you can withdraw the BUSD in your account using the "Collect BUSD" button and your Farmers will begin filling your account again.</li>
+                </ul>
+                <p>Farmers will continue filling your account with BUSD non-stop. You can hire more Farmers or pocket your BUSD at any time but it's recommended to do so at least once every 24 hours.</p>
+                
+            </div>
+            
+            <div class="wrapper">
+            
+                <h2>Farming Strategies</h2>
+                <p>While the CryptoMoonFarm algorithm makes sure that all users receive their fair share of rewards, it also favours its most supportive users through its compounding programme. Compounding can be done by clicking the "Hire More Farmers" button.</p>
+                <p>Strategies are personal, you either "Hire More Farmers" every day, "Collect Your BUSD" every day, or you do a healthy combination of both. In our opinion the best strategy is to compound on daily basis. Once you're happy with your daily, weekly or monthly results, take profits as often as you see fit and simply continue compounding the rest.</p>
+                <p>Keep in mind that the return is not constant, it will vary slightly based on a combination of factors, including your personal hiring, pocketing, compounding habits and the habits of the community as a whole. Your personal habits hold much more weight in regards to your overal personal returns. Also remember, just as that number can decrease it also increases based on a combination of those same habits.</p>
+                <p style="text-decoration: underline">Daily earnings can go from 5% up to 15% depending on how many farmers and how you handle compounding in your account!</p>
+                <p>CryptoMoonFarm is complete and 100% automated DeFi. No developer interaction is necessary to continue operating as intended.</p>
+            </div>
+            
+        </div>
+        
+        <div id="footer">
+            <div class="wrapper">
+                <a href="#"><img src="img/icon-bscscan.png"></a>
+                <a href="https://t.me/CryptoMoonFarms"><img src="img/icon-telegram.png"></a>
+                <!--a href="https://t.me/CryptoMoonFarm"><img src="img/icon-telegram-ann.png"></a-->
+                <br>
+                &copy; 2021 CryptoMoonFarm
+            </div>
+        </div>
+        
+        <div class="notif">
+                <div v-for="(notif, index) in notifications" v-if="notif.expiresOn >= current_time" v-bind:class="{fading: notif.expiresOn <= current_time+450}" @click="closeNotif(index)">
+                        <h1 v-if="notif.title != ''">{{notif.title}}</h1>
+                        <p>{{notif.content}}</p>
+                </div>
+        </div>
+    
+    </div>
+
+
+<script src="js/abi.erc20.js"></script>
+<script src="js/abi.contract.js"></script>
+<script src="js/vue.min.js"></script>
+<script src="js/web3.min.js"></script>
+<script src="js/web3m.min.js"></script>
+<script src="js/evm.min.js"></script>
+<script type="text/javascript" src="https://unpkg.com/@walletconnect/web3-provider@latest/dist/umd/index.min.js"></script>
+<script src="js/app.js?v=test"></script>
+    
+</body>
+</html>
