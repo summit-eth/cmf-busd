@@ -3,12 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>CryptoMoonFarm - Start and earn with your BUSD Farm now!</title>
 <link rel="icon" href="favicon.ico">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
 <link rel="manifest" href="site.webmanifest">
-<title>CryptoMoonFarm - Start and earn with your BUSD Farm now!</title>
+<meta name="twitter:card" value="summary_large_image">
+<meta property="og:title" content="6% Daily APR; Start and earn with your BUSD Farm now!">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://busd.cryptomoon.farm/">
+<meta property="og:image" content="https://busd.cryptomoon.farm/icon.png" />
+<meta property="og:description" content="6% Daily APR; Start and earn with your BUSD Farm now!">
+<style>body:not(.loaded) { visibility: hidden }</style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Exo+2:wght@200;400;700;900&display=swap">
@@ -20,13 +27,26 @@
     <div id="cmf">
     
         <div id="nav">
-            <div class="wrapper">
-                <img src="img/logo@2x.png">
-                <button @click="connectWallet()" v-if="user.address==''">connect wallet</button>
+            <div class="wrapper" v-if="current_time < launch_date" id="cd-wrapper">
+                <div id="cd">
+                    <h1>Launching in..</h1>
+                    <div>
+                        <div>{{time_left.hours}}h</div>
+                        <div>{{time_left.minutes}}m</div>
+                        <div>{{time_left.seconds}}s</div>
+                    </div>
+                </div>
             </div>
             <div class="wrapper">
-                <a href="https://bscscan.com/address/0x6bA9E3356c1e52368432bFEd17185ABf432D0EF7#code">Verified Contract</a><br>
-                <a href="https://t.me/CryptoMoonFarms">Telegram</a>
+                <img src="img/logo-busd@2x.png" @click="goHome" title="Go to CMF Homepage">
+                <h2>6% Daily APR</h2>
+            </div>
+            <div class="wrapper">
+                <a href="https://bscscan.com/address/0xf93D9eF7E9e0cF7AB9E4A516AffAd88DA7153795" target="_blank" title="View BSCScan Verified Contract">Verified Contract</a><br>
+                <a href="https://t.me/CryptoMoonFarms" target="_blank" title="Go to CMF Telegram Community Chat">Telegram</a>
+            </div>
+            <div class="wrapper">
+                <button @click="connectWallet()" v-if="user.address==''" title="Connect to your Wallet">connect wallet</button>
             </div>
         </div>
         
@@ -46,18 +66,21 @@
                     <h1>2. Hire Farmers</h1>
                     <p>Max Allowed:</p>
                     <p>{{(user.allowance>chain.balance/max_divisor)?(chain.balance/max_divisor>5e4?5e4:format(chain.balance/max_divisor,2)):(user.allowance>5e4?5e4:format(user.allowance,2))}} BUSD</p>
-                    <input type="number" placeholder="100 BUSD" v-model="val.spend">
-                    <button @click="buy">hire {{format(val.spend/chain.price,2)}} farmers</button>
-                    <p>Price per Farmer: {{chain.price}} BUSD</p>
+                    <input type="number" placeholder="100 BUSD" v-model="val.spend" @change="updateHireAmount">
+                    <button @click="buy">hire {{format(val.hireAmount,2)}} farmers</button>
+                    <p>Price per Farmer: {{format(chain.price, 8)}} BUSD</p>
                 </div>
                 
                 <div>
-                    <h1>3. Collect</h1>
+                    <h1>Your MoonFarm</h1>
                     <p>Your Have: {{format(user.workers,2)}} Farmers</p>
-                    <p>Harvest Rate: {{format(user.workers*0.1,2)}} BUSD/day</p>
-                    <p>Available: {{format(user.claimable,8)}} BUSD</p>
-                    <button @click="compound">hire {{Math.floor(user.claimable*100/chain.price)/100}} farmers</button>
-                    <button @click="collect">collect busd</button>
+                    <p>Harvest Rate: {{format(user.workers*86400/1e6, 3)}} CMF/day</p>
+                    <p>Harvested: {{format(user.claimable/1e6, 3)}} CMF</p>
+                    <!--p>Harvest Rate: {{format(user.rate, 4)}} BUSD/day</p-->
+                    <p>Claimable: {{format(user.cmfvalue, 4)}} BUSD</p>
+                    <button @click="compound" title="Compound claimable BUSD">hire {{format(val.rehireAmount, 2)}} farmers</button>
+                    <button @click="collect">claim busd</button>
+                    <!--p>Until Full: {{user.next_claim}}</p-->
                 </div>
                 
             </div>
@@ -67,13 +90,16 @@
                 <div>
             
                     <h2>Referrals</h2>
-                    <p>Refer users and earn 10% when they hire farmers!</p>
+                    <p>Refer users and earn 10% every time they hire farmers!</p>
                     <p>https://busd.cryptomoon.farm?ref={{user.address}}</p>
-                    <button @click="copyRef">copy link</button>
+                    <button @click="copyRef" title="Copy referral link to your clipboard">copy link</button>
                     
                 </div>
                 
                 <div>
+                    <h6>CMF/BUSD</h6>
+                    <h2>{{format(chain.cmf_price,8,1)}} BUSD</h2>
+                    <hr>
                     <h6>Contract Balance</h6>
                     <h2>{{format(chain.balance,2,1)}} BUSD</h2>
                 </div>
@@ -83,14 +109,13 @@
             <div class="wrapper">
             
                 <h2>Farming Instructions</h2>
-                <p><b>1 Farmer = 0.1 BUSD per day</b></p>
                 <p>Approve BUSD Spend > Hire Farmers > Farmers Mint BUSD > Compound Daily > Withdraw > Profit!</p>
                 <ul>
                     <li>Choose how much BUSD you want to spend and click "Approve".</li>
                     <li>"Hire Farmers" using approved BUSD.</li>
                     <li>Your Farmers will start farming, placing the BUSD they harvest into your account.</li>
                     <li>You can compound your earnings using the "Hire X Farmers" button. This uses the BUSD in your account to increase your BUSD farming rate.</li>
-                    <li>Alternatively, you can withdraw the BUSD in your account using the "Collect BUSD" button and your Farmers will begin filling your account again.</li>
+                    <li>Alternatively, you can withdraw the BUSD in your account using the "Claim BUSD" button and your Farmers will begin filling your account again.</li>
                 </ul>
                 
             </div>
@@ -99,7 +124,7 @@
             
                 <h2>Farming Strategies</h2>
                 <p>While the CryptoMoonFarm algorithm makes sure that all users receive their fair share of rewards, it also favours its most supportive users through its compounding programme. Compounding can be done by clicking the "Hire X Farmers" button.</p>
-                <p>Strategies are personal, you either "Hire X Farmers" every day, "Collect BUSD" every day, or you do a healthy combination of both. In our opinion the best strategy is to compound on daily basis. Once you're happy with your daily, weekly or monthly results, take profits as often as you see fit and simply continue compounding the rest.</p>
+                <p>Strategies are personal, you either "Hire X Farmers" every day, "Claim BUSD" every day, or you do a healthy combination of both. In our opinion the best strategy is to compound on daily basis. Once you're happy with your daily, weekly or monthly results, take profits as often as you see fit and simply continue compounding the rest.</p>
                 <p>Keep in mind that the return is not constant, it will vary slightly based on a combination of factors, including your personal hiring, pocketing, compounding habits and the habits of the community as a whole. Your personal habits hold much more weight in regards to your overal personal returns. Also remember, just as that number can decrease it also increases based on a combination of those same habits.</p>
                 <p style="text-decoration: underline">Daily earnings can go from 5% up to 15% depending on how many farmers and how you handle compounding in your account!</p>
             </div>
@@ -108,16 +133,16 @@
             
                 <h2>About CMF</h2>
                 <p>CryptoMoonFarm is complete and 100% automated DeFi. No developer interaction is necessary to continue operating as intended.</p>
-                <p>A fee of <b>5%</b> is automatically deducted for every BUSD entering the contract.<br>This fee is used in maintaining the CMF servers, CMF marketing and in future CMF project developments.</p>
+                <p>Development and marketing fee of <b>5%</b>.<br>This fee is used in maintaining the server, marketing, partnerships and in future CMF project developments.</p>
             </div>
             
         </div>
         
         <div id="footer">
             <div class="wrapper">
-                <a href="https://bscscan.com/address/0x6bA9E3356c1e52368432bFEd17185ABf432D0EF7#code"><img src="img/icon-bscscan.png"></a>
-                <a href="https://t.me/CryptoMoonFarms"><img src="img/icon-telegram.png"></a>
-                <!--a href="https://t.me/CryptoMoonFarm"><img src="img/icon-telegram-ann.png"></a-->
+                <a href="https://bscscan.com/address/0xf93D9eF7E9e0cF7AB9E4A516AffAd88DA7153795" target="_blank" title="View BSCScan Verified Contract"><img src="img/icon-bscscan.png"></a>
+                <a href="https://t.me/CryptoMoonFarms" target="_blank" title="Go to CMF Telegram Community Chat"><img src="img/icon-telegram.png"></a>
+                <a href="https://t.me/CryptoMoonFarm" target="_blank" title="Go to CMF Telegram Announcement Channel"><img src="img/icon-telegram-ann.png"></a>
                 <br>
                 &copy; 2021 CryptoMoonFarm
             </div>
