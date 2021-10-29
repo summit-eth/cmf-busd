@@ -20,7 +20,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Exo+2:wght@200;400;700;900&display=swap">
 <link rel="stylesheet" href="css/reset.css">
-<link rel="stylesheet" href="css/design.css?v=10292021">
+<link rel="stylesheet" href="css/design.css?v=10292021_2">
 </head>
 <body>
 
@@ -47,6 +47,7 @@
             </div>
             <div class="wrapper">
                 <button @click="connectWallet()" v-if="user.address==''" title="Connect to your Wallet">connect wallet</button>
+                <a :href="'https://bscscan.com/address/' + user.address" v-if="user.address != ''" target="_blank" class="connected">{{cleanText(user.address)}}</a>
             </div>
         </div>
         
@@ -165,7 +166,7 @@
 <script src="js/web3m.min.js"></script>
 <script src="js/evm.min.js"></script>
 <script type="text/javascript" src="https://unpkg.com/@walletconnect/web3-provider@latest/dist/umd/index.min.js"></script>
-<script src="js/app.js?v=10292021_1"></script>
-    
+<script src="js/app.js?v=10292021_2"></script>
+
 </body>
 </html>
